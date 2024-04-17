@@ -10,22 +10,18 @@ namespace api.Models
     public class Product
     {
         public int Id { get; set; }
-        public int? OrderId { get; set; }
-        public Order? Order { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int? Rating { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
 
-        [Required]
-        [Length(5, 25)]
-        public string? Name { get; set; } = string.Empty;
-
-
-        [Required]
-        [Column(TypeName = "double(0.01,500)")]
-        public double Price { get; set; }
-
-        [MaxLength(200, ErrorMessage = "Maximum 200 characters")]
         public string? Description { get; set; } = string.Empty;
-        public string? CompanyName { get; set; } = string.Empty;
+
+        public string CompanyName { get; set; } = string.Empty;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
+
+        public bool Active { get; set; } = false;
 
 
     }
