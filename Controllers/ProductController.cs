@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.Dtos.Product;
+using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/product")]
     public class ProductController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,40 +21,80 @@ namespace api.Controllers
 
         }
 
+
+
+
+
         [HttpGet]
-        public IActionResult GetProducts()
+        public IActionResult GetAllProducts()
         {
-            return Ok(_context.Products.ToList());
+            var products = _context.Products.ToList()
+            .Select(x => x.ToProductDto());
+            return Ok(products);
         }
+
+
 
         [HttpGet("{id}")]
-        public IActionResult GetProduct(int id)
+        public IActionResult GetProductById([FromRoute] int id)
         {
-            if (id <= 0) return BadRequest();
-            var product = _context.Products.FirstOrDefault(x => x.Id == id);
+            var product = _context.Products.Find(id);
             if (product == null) return NotFound();
-            return Ok(product);
-
+            return Ok(product.ToProductDto());
         }
+
+
 
 
         [HttpPost]
-        public IActionResult CreateProduct([FromBody] Product product)
+        public IActionResult CreateProduct([FromBody] CreateProductRequestDto productDto)
         {
-            return Ok("new product");
+
+            var productModel = productDto.ToProductFromCreatedDto();
+            _context.Products.Add(productModel);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(GetProductById), new { id = productModel.Id }, productModel.ToProductDto());
         }
 
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateProduct(int id)
+
+
+        [HttpPut]
+        [Route("{id}")]
+        public IActionResult UpdateProduct([FromRoute] int id, [FromBody] UpdateProductRequestDto updateDto)
         {
-            return Ok($"Product with id{id} to update");
+            var productModel = _context.Products.FirstOrDefault(x => x.Id == id);
+            if (productModel == null)
+            {
+                return NotFound();
+            }
+            //if(User.IsInRole("Admin")){}
+            productModel.Name = updateDto.Name;
+            productModel.Price = updateDto.Price;
+            productModel.Rating = updateDto.Rating;
+            productModel.Description = updateDto.Description;
+            productModel.CompanyName = updateDto.CompanyName;
+            productModel.Active = updateDto.Active;
+            //else{productModel.Rating = updateDto.Rating; }
+            _context.SaveChanges();
+            return Ok(productModel.ToProductDto());
+
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteProduct(int id)
+
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult DeleteProduct([FromRoute] int id)
         {
-            return Ok($"Delete product with id{id}");
+            var productModel = _context.Products.FirstOrDefault(x => x.Id == id);
+            if (productModel == null)
+            {
+                return NotFound();
+            }
+            _context.Products.Remove(productModel);
+            _context.SaveChanges();
+            return NoContent();
+
         }
 
 

@@ -1,18 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace api.Models
+namespace api.Dtos.Customer
 {
-    public class Customer
+    public class CreateCustomerRequestDto
     {
-        public int Id { get; set; }
+        [Required]
         public string Address { get; set; } = string.Empty;
+
+        [Required]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        [Required]
         public string Email { get; set; } = string.Empty;
-        public int UserId { get; set; }
-        public User? User { get; set; }
-        public List<Order> Orders { get; set; } = new List<Order>();
+
+
     }
 }

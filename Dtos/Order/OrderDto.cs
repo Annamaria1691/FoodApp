@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using api.Dtos.OrderedProduct;
 
-namespace api.Models
+namespace api.Dtos.Order
 {
     public enum OrderStatus
     {
@@ -15,25 +14,21 @@ namespace api.Models
         Delivered,
         Canceled
     }
-    public class Order
-    {
 
+    public class OrderDto
+    {
         public int Id { get; set; }
 
         public int? OrderRating { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
+
         public decimal DeliveryPrice { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
         public DateTime OrderedOn { get; set; } = DateTime.Now;
         public string? CustomerReview { get; set; } = string.Empty;
 
         public OrderStatus Status { get; set; }
-        public List<OrderedProduct>? OrderedProducts { get; set; }
-
-
-
+        public List<OrderedProductDto>? OrderedProducts { get; set; }
     }
 }
