@@ -30,5 +30,16 @@ namespace api.Mappers
             return orderDto;
 
         }
+
+        public static Order ToOrderFromCreatedDto(this CreateOrderRequestDto orderDto)
+        {
+            return new Order
+            {
+                DeliveryPrice = orderDto.DeliveryPrice,
+                Total = orderDto.Total,
+                OrderedOn = orderDto.OrderedOn
+            };
+        }
+
     }
 }

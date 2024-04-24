@@ -24,7 +24,7 @@ namespace api.Mappers
             };
         }
 
-        public static OrderedProduct ToOrderedProductFromCreate(this CreateOrderedProductRequestDto orderedProductDto)
+        public static OrderedProduct ToOrderedProductFromCreateDto(this CreateOrderedProductRequestDto orderedProductDto)
         {
             return new OrderedProduct
             {

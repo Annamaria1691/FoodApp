@@ -7,6 +7,7 @@ using api.Dtos.Product;
 using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
@@ -26,19 +27,19 @@ namespace api.Controllers
 
 
         [HttpGet]
-        public IActionResult GetAllProducts()
+        public async Task<IActionResult> GetAllProducts()
         {
-            var products = _context.Products.ToList()
-            .Select(x => x.ToProductDto());
-            return Ok(products);
+            var products = await _context.Products.ToListAsync();
+            var productsDto = products.Select(x => x.ToProductDto());
+            return Ok(productsDto);
         }
 
 
 
         [HttpGet("{id}")]
-        public IActionResult GetProductById([FromRoute] int id)
+        public async Task<IActionResult> GetProductById([FromRoute] int id)
         {
-            var product = _context.Products.Find(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
             return Ok(product.ToProductDto());
         }
@@ -47,12 +48,12 @@ namespace api.Controllers
 
 
         [HttpPost]
-        public IActionResult CreateProduct([FromBody] CreateProductRequestDto productDto)
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequestDto productDto)
         {
 
             var productModel = productDto.ToProductFromCreatedDto();
-            _context.Products.Add(productModel);
-            _context.SaveChanges();
+            await _context.Products.AddAsync(productModel);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetProductById), new { id = productModel.Id }, productModel.ToProductDto());
         }
 
@@ -61,9 +62,9 @@ namespace api.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult UpdateProduct([FromRoute] int id, [FromBody] UpdateProductRequestDto updateDto)
+        public async Task<IActionResult> UpdateProduct([FromRoute] int id, [FromBody] UpdateProductRequestDto updateDto)
         {
-            var productModel = _context.Products.FirstOrDefault(x => x.Id == id);
+            var productModel = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
             if (productModel == null)
             {
                 return NotFound();
@@ -76,7 +77,7 @@ namespace api.Controllers
             productModel.CompanyName = updateDto.CompanyName;
             productModel.Active = updateDto.Active;
             //else{productModel.Rating = updateDto.Rating; }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok(productModel.ToProductDto());
 
         }
@@ -84,15 +85,15 @@ namespace api.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult DeleteProduct([FromRoute] int id)
+        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
-            var productModel = _context.Products.FirstOrDefault(x => x.Id == id);
+            var productModel = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
             if (productModel == null)
             {
                 return NotFound();
             }
             _context.Products.Remove(productModel);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
 
         }
