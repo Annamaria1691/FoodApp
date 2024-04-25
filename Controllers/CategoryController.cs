@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Category;
+using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +15,19 @@ namespace api.Controllers
     [Route("api/category")]
     public class CategoryController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
 
-        public CategoryController(ApplicationDbContext context)
+        private readonly ICategoryRepository _categoryRepo;
+
+        public CategoryController(ICategoryRepository categoryRepo)
         {
-            _context = context;
+
+            _categoryRepo = categoryRepo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _categoryRepo.GetAllCategoriesAsync();
             var categoriesDto = categories.Select(x => x.ToCategoryDto());
             return Ok(categoriesDto);
         }
@@ -34,7 +37,7 @@ namespace api.Controllers
         public async Task<IActionResult> GetCategoryById([FromRoute] int id)
         {
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _categoryRepo.GetCategoryByIdAsync(id);
             if (category == null) return NotFound();
             return Ok(category.ToCategoryDto());
         }
@@ -43,8 +46,7 @@ namespace api.Controllers
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequestDto categoryDto)
         {
             var categoryModel = categoryDto.ToCategoryFromCreatedDto();
-            await _context.Categories.AddAsync(categoryModel);
-            await _context.SaveChangesAsync();
+            await _categoryRepo.CreateCategoryAsync(categoryModel);
             return CreatedAtAction(nameof(GetCategoryById), new { id = categoryModel.Id }, categoryModel.ToCategoryDto());
 
         }
@@ -53,12 +55,9 @@ namespace api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] UpdateCategoryRequestDto updateDto)
         {
-            var categoryModel = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            var categoryModel = await _categoryRepo.UpdateCategoryAsync(id, updateDto);
             if (categoryModel == null) return NotFound();
-            categoryModel.Title = updateDto.Title;
-            categoryModel.Active = updateDto.Active;
-            categoryModel.Promoted = updateDto.Promoted;
-            await _context.SaveChangesAsync();
+
             return Ok(categoryModel.ToCategoryDto());
         }
 
@@ -66,10 +65,9 @@ namespace api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> DeleteCategory([FromRoute] int id)
         {
-            var categoryModel = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            var categoryModel = await _categoryRepo.DeleteCategoryAsync(id);
             if (categoryModel == null) return NotFound();
-            _context.Categories.Remove(categoryModel);
-            await _context.SaveChangesAsync();
+
             return NoContent();
         }
 

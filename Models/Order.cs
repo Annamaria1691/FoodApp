@@ -23,13 +23,14 @@ namespace api.Models
         public int? OrderRating { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal DeliveryPrice { get; set; }
+        public decimal DeliveryPrice { get; set; } = 15;
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
         public DateTime OrderedOn { get; set; } = DateTime.Now;
         public string? CustomerReview { get; set; } = string.Empty;
-
+        public int CustomerId { get; set; }
+        public Customer? Customer { get; set; }
         public OrderStatus Status { get; set; }
         public List<OrderedProduct>? OrderedProducts { get; set; }
 

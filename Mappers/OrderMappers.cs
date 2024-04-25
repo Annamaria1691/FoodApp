@@ -35,6 +35,7 @@ namespace api.Mappers
         {
             return new Order
             {
+                CustomerId = orderDto.CustomerId,
                 DeliveryPrice = orderDto.DeliveryPrice,
                 Total = orderDto.Total,
                 OrderedOn = orderDto.OrderedOn

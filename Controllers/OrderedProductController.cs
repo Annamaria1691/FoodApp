@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.OrderedProduct;
+using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,16 +15,16 @@ namespace api.Controllers
     [Route("api/[controller]")]
     public class OrderedProductController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        public OrderedProductController(ApplicationDbContext context)
+        private readonly IOrderedProductRepository _orderedProductRepo;
+        public OrderedProductController(IOrderedProductRepository orderedProductRepo)
         {
-            _context = context;
+            _orderedProductRepo = orderedProductRepo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllOrderedProducts()
         {
-            var orderedProducts = await _context.OrderedProducts.ToListAsync();
+            var orderedProducts = await _orderedProductRepo.GetAllOrderedProductsAsync();
             var orderedProductsDto = orderedProducts.Select(x => x.ToOrderedProductDto());
             return Ok(orderedProductsDto);
         }
@@ -33,7 +34,7 @@ namespace api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderedProductById([FromRoute] int id)
         {
-            var orderedProduct = await _context.OrderedProducts.FindAsync(id);
+            var orderedProduct = await _orderedProductRepo.GetOrderedProductByIdAsync(id);
             if (orderedProduct == null) return NotFound();
             return Ok(orderedProduct.ToOrderedProductDto());
         }
@@ -41,9 +42,15 @@ namespace api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrderedProduct([FromBody] CreateOrderedProductRequestDto orderedProductDto)
         {
+
             var orderedProductModel = orderedProductDto.ToOrderedProductFromCreateDto();
-            await _context.OrderedProducts.AddAsync(orderedProductModel);
-            await _context.SaveChangesAsync();
+            if (orderedProductDto.ProductId <= 0 || orderedProductDto.OrderId <= 0)
+            {
+                return BadRequest();
+            }
+            orderedProductModel.ProductId = orderedProductDto.ProductId;
+            orderedProductModel.OrderId = orderedProductDto.OrderId;
+            await _orderedProductRepo.CreateOrderedProductAsync(orderedProductModel);
             return CreatedAtAction(nameof(GetOrderedProductById), new { id = orderedProductModel.Id }, orderedProductModel.ToOrderedProductDto());
 
         }
@@ -52,12 +59,10 @@ namespace api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateOrderedProduct([FromRoute] int id, [FromBody] UpdateOrderedProductRequestDto updateDto)
         {
-            var orderedProductModel = await _context.OrderedProducts.FirstOrDefaultAsync(x => x.Id == id);
+            var orderedProductModel = await _orderedProductRepo.UpdateOrderedProductAsync(id, updateDto);
             if (orderedProductModel == null) return NotFound();
-            orderedProductModel.Specifications = updateDto.Specifications;
-            orderedProductModel.Quantity = updateDto.Quantity;
-            orderedProductModel.Total = updateDto.Total;
-            await _context.SaveChangesAsync();
+
+
             return Ok(orderedProductModel.ToOrderedProductDto());
         }
 
@@ -65,10 +70,9 @@ namespace api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> DeleteOrderedProduct([FromRoute] int id)
         {
-            var orderedProductModel = await _context.OrderedProducts.FirstOrDefaultAsync(x => x.Id == id);
+            var orderedProductModel = await _orderedProductRepo.DeleteOrderedProductAsync(id);
             if (orderedProductModel == null) return NotFound();
-            _context.OrderedProducts.Remove(orderedProductModel);
-            await _context.SaveChangesAsync();
+
             return NoContent();
         }
 

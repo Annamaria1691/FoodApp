@@ -17,6 +17,7 @@ namespace api.Mappers
                 Name = productModel.Name,
                 Rating = productModel.Rating,
                 Price = productModel.Price,
+                CategoryId = productModel.CategoryId,
                 Description = productModel.Description,
                 CompanyName = productModel.CompanyName
             };

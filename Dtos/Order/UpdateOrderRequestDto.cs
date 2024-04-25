@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api.Dtos.OrderedProduct;
 
 namespace api.Dtos.Order
 {
@@ -9,6 +10,7 @@ namespace api.Dtos.Order
     {
         public int? OrderRating { get; set; }
         public string? CustomerReview { get; set; } = string.Empty;
-        public List<api.Models.OrderedProduct>? OrderedProducts { get; set; }
+        //public List<api.Models.OrderedProduct>? OrderedProducts { get; set; }
+
     }
 }
